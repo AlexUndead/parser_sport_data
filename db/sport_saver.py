@@ -4,7 +4,7 @@ from db.base import Base, engine, session
 from db.tables import Sport, Championship, Match, Duplicate
 
 
-class Saver:
+class SportSaver:
     """Класс для сохранения/изменения элементов бд"""
     def __init__(self, matches_data):
         self.matches = matches_data
@@ -46,7 +46,7 @@ class Saver:
 
     def get_duplicate_objects(self, duplicates):
         """получить массив объектов орм сущности дубликат матча"""
-        return [Duplicate(duplicate_match_id=duplicate) for duplicate in duplicates]
+        return [Duplicate(external_match_id=duplicate) for duplicate in duplicates]
 
     def get_transform_date(self, raw_match_date):
         """получить преобразованное время"""

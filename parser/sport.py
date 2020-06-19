@@ -17,7 +17,7 @@ class Sport:
     event_type = 'T'
     parsed_data = []
 
-    def is_variable_match(self, match):
+    def is_match_data(self, match):
         """проверка непосредственного исхода матча"""
         return True if match[self.event_type] == '' and match['A'] != 'Гости (голы)' else False
 
@@ -25,10 +25,10 @@ class Sport:
         """получение дубликаты матчей"""
         return [duplicate[self.match_id] for duplicate in match[self.matches]]
 
-    def preparation_matches(self, sport_name, championship_name, matches):
-        """подготовка матчей"""
+    def processing_match_data(self, sport_name, championship_name, matches):
+        """обрабока данных матча"""
         for match in matches:
-            if self.is_variable_match(match):
+            if self.is_match_data(match):
                 prepared_match_data = {
                     'external_id': match[self.match_id],
                     'home_team': match[self.match_home],
@@ -40,27 +40,30 @@ class Sport:
                 }
                 self.parsed_data.append(prepared_match_data)
 
-    def preparation_championships(self, sport_name, championship_data):
-        """подготовка чемпионатов"""
+    def parse_championships(self, sport_name, championship_data):
+        """парсинг данных чемпионатов"""
         for championship in championship_data:
-            self.preparation_matches(
+            self.processing_match_data(
                 sport_name,
                 championship[self.championship_name],
                 championship[self.matches]
             )
 
-    def validate_data(self, sport_data):
-        """обработка спортивных данных"""
+    def parse_sports(self, sport_data):
+        """парсинг данных спорта"""
         for sport_type in sport_data[self.sport_types]:
-            self.preparation_championships(
+            self.parse_championships(
                 sport_type[self.sport_name],
                 sport_type[self.championship_types]
             )
 
     def run(self):
         """запуск парсинга и возвращения результата"""
-        for file in os.listdir(path=FILE_PATH['SPORT']):
-            with open(FILE_PATH['SPORT']+file) as json_data:
-                self.validate_data(json.loads(json_data.readline()))
+        try:
+            for file in os.listdir(path=FILE_PATH['SPORT']):
+                with open(FILE_PATH['SPORT']+file) as sport_json_data:
+                    self.parse_sports(json.loads(sport_json_data.readline()))
 
-        return self.parsed_data
+            return self.parsed_data
+        except json.JSONDecodeError:
+            print('Не валидный json в файле '+file)

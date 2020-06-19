@@ -23,4 +23,5 @@ session = sessionmaker(bind=engine)
 
 @as_declarative(metadata=metadata)
 class Base:
+    """Базовый класс работы с бд"""
     pass

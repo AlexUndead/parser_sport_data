@@ -3,6 +3,7 @@ from config import RABBIT_MQ_SETTINGS
 
 
 class Base:
+    """Базовый класс клиента брокера"""
     def __init__(self):
         credentials = pika.PlainCredentials(
             RABBIT_MQ_SETTINGS['USER'],

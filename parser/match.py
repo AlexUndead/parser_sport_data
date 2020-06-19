@@ -1,6 +1,7 @@
 import json
 from config import FILE_PATH
 from db.receive import Receive
+from logger.parser import Parser
 
 
 class Match:
@@ -17,6 +18,7 @@ class Match:
 
     def __init__(self):
         self.receive = Receive()
+        self.logger = Parser()
 
     def processing_match_bets_data(self, match_bets_data, external_match_id):
         """обработка данных о ставках матча"""
@@ -51,6 +53,7 @@ class Match:
 
             return self.parsed_data
         except FileNotFoundError:
-            print('Файл '+external_match_id+'.json не найден')
+            self.logger.write('Файл '+external_match_id+'.json не найден')
         except json.JSONDecodeError:
-            print('Не валидный json в файле '+external_match_id+'.json')
+            self.logger.write('Не валидный json в файле '+external_match_id+'.json')
+

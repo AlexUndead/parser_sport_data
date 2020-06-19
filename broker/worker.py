@@ -4,6 +4,8 @@ from config import RABBIT_MQ_SETTINGS
 from db.receive import Receive
 from db.bet_saver import BetSaver
 from parser.match import Match
+from logger.broker import Broker
+from pika.exceptions import AMQPError
 
 
 class Worker(Base):
@@ -14,6 +16,7 @@ class Worker(Base):
         self.db_receive = Receive()
         self.db_bet_saver = BetSaver()
         self.parser_match = Match()
+        self.logger = Broker()
 
     def set_channel_settings(self):
         """установка начальных значений очереди"""
@@ -40,4 +43,7 @@ class Worker(Base):
         """
         запуск процесса получающего и обрабатывающего данных из очереди
         """
-        self.channel.start_consuming()
+        try:
+            self.channel.start_consuming()
+        except AMQPError:
+            self.logger.write(AMQPError.args[0])

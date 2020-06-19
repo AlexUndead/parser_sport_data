@@ -1,6 +1,7 @@
 import json
 import os
 from config import FILE_PATH
+from logger.parser import Parser
 
 
 class Sport:
@@ -16,6 +17,9 @@ class Sport:
     match_date = 'S'
     event_type = 'T'
     parsed_data = []
+
+    def __init__(self):
+        self.logger = Parser()
 
     def is_match_data(self, match):
         """проверка непосредственного исхода матча"""
@@ -66,4 +70,4 @@ class Sport:
 
             return self.parsed_data
         except json.JSONDecodeError:
-            print('Не валидный json в файле '+file)
+            self.logger.write('Не валидный json в файле '+file)

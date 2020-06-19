@@ -1,5 +1,7 @@
 from .base import Base
 from config import RABBIT_MQ_SETTINGS
+from logger.broker import Broker
+from pika.exceptions import AMQPError
 
 
 class GenerateTasks(Base):
@@ -8,6 +10,7 @@ class GenerateTasks(Base):
         super().__init__()
         self.match_ids = match_ids
         self.set_channel_settings()
+        self.logger = Broker()
 
     def set_channel_settings(self):
         """установка начальных настроек"""
@@ -26,11 +29,14 @@ class GenerateTasks(Base):
 
     def run(self):
         """запуск процесса добавления id матчей в очередь"""
-        for match_id in self.match_ids:
-            self.channel.basic_publish(
-                exchange=RABBIT_MQ_SETTINGS['EXCHANGE_NAME'],
-                routing_key=RABBIT_MQ_SETTINGS['QUEUE_NAME'],
-                body=str(match_id),
-                properties=self.basic_properties
-            )
+        try:
+            for match_id in self.match_ids:
+                self.channel.basic_publish(
+                    exchange=RABBIT_MQ_SETTINGS['EXCHANGE_NAME'],
+                    routing_key=RABBIT_MQ_SETTINGS['QUEUE_NAME'],
+                    body=str(match_id),
+                    properties=self.basic_properties
+                )
+        except AMQPError:
+            self.logger.write(AMQPError.args[0])
 

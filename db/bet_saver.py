@@ -1,11 +1,14 @@
 from db.base import session
 from db.tables import Bet
+from logger.db import DB
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class BetSaver:
-    """класс для сохранения ставок"""
+    """класс для сохранения|изменения ставок матчей в бд"""
     def __init__(self):
         self.session = session()
+        self.logger = DB()
 
     def change_bet_object(self, bet, bet_data):
         """именение объекта орм ставки"""
@@ -41,10 +44,13 @@ class BetSaver:
 
     def save(self, bet_data):
         """сохранение ставок матчей"""
-        bets_objects = []
-        for bet in bet_data:
-            bets_objects.append(self.get_bet_object(bet))
+        try:
+            bets_objects = []
+            for bet in bet_data:
+                bets_objects.append(self.get_bet_object(bet))
 
-        self.session.add_all(bets_objects)
-        self.session.flush()
-        self.session.commit()
+            self.session.add_all(bets_objects)
+            self.session.flush()
+            self.session.commit()
+        except SQLAlchemyError:
+            self.logger.write(SQLAlchemyError.args[0])
